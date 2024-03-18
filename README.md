@@ -18,7 +18,7 @@ While this may sound incredible since we are using multiple tools and ways, but 
 3. Parallel
 4. Sudo permission (since masscan requires sudo)
 
-Test only on KaliLinux.
+Tested only on KaliLinux.
 
 # Usage
 1. `chmod +x httpup`
