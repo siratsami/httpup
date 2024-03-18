@@ -7,7 +7,7 @@ After finding subdomains and hosts, hackers needs to know which subdomain suppor
 ## How does it work?
 1. Resolving all subdomains/hosts with massdns
 2. Extracting ip addresses of subdomains which have A and CNAME records
-3. Scanning for 443,80 ports on ip addresses
+3. Scanning for 443,80 ports on subdomain ip addresses
 4. Finding subdomains which belongs to the ip addresses which supports 443,80 ports
 
 While this may sound incredible since we are using multiple tools and ways, but its actually much faster than any other tools such as httpx, it also has 0 misses and you won't get rate limited since we do not send any actual http request to the subdomains and hosts itself.
