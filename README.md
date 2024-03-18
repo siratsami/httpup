@@ -24,3 +24,5 @@ Test only on KaliLinux.
 1. `chmod +x httpup`
 2. `sudo ./httpup subdomains.txt`
 3. Final result will be saved as `httpsubdomains.txt`
+
+Demo video https://youtu.be/UBxlM1_O8aM
