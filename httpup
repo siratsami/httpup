@@ -4,35 +4,34 @@ echo "Usage: sudo ./httpup subdomains.txt"
 echo "https://twitter.com/siratsami71"
 echo ""
 
-echo "Creating temporary resolver file"
-echo 1.1.1.1 >> resolver.tmp
-echo 8.8.8.8 >> resolver.tmp
-echo ""
-
+# Dont forget to locate your resolvers file
 echo "Running massdns..."
-sleep 1 && massdns -r resolver.tmp -t A $1 -w mdo.tmp
+sleep 1 && massdns -r ../resolvers.txt -t A $1 -w mdo.tmp
 echo ""
 
 echo "Extracting ip addresses of subdomains"
-grep -A 1 ";; ANSWER SECTION" mdo.tmp | grep 'IN A ' | awk -F'A ' '{print $2}' | sort -u >> ips.tmp
-awk '/IN CNAME/,/IN A/{print}' mdo.tmp | grep ' IN A ' | awk -F'A ' '{print $2}' | sort -u >> ips2.tmp
+grep -A 1 ";; ANSWER SECTION" mdo.tmp | grep 'IN A ' | awk -F'A ' '{print $2}' | sort -u > ips.tmp
+awk '/IN CNAME/,/IN A/{print}' mdo.tmp | grep ' IN A ' | awk -F'A ' '{print $2}' | sort -u > ips2.tmp
 echo ""
 
 echo "Scannig for 443,80 ports on ip addresses..."
 sudo masscan -p 443,80 -iL ips.tmp -oL ipsms.tmp
 sudo masscan -p 443,80 -iL ips2.tmp -oL ips2ms.tmp
-cat ipsms.tmp | awk -F' ' '{print $4}' | awk -F' ' '{print $1}' | sort -u >> liveips.tmp
-cat ips2ms.tmp | awk -F' ' '{print $4}' | sort -u >> liveips2.tmp
+cat ipsms.tmp | awk -F' ' '{print $4}' | awk -F' ' '{print $1}' | sort -u > liveips.tmp
+cat ips2ms.tmp | awk -F' ' '{print $4}' | sort -u > liveips2.tmp
 echo ""
 
 echo "Searching for http subdomains..."
-grep -A 1 "ANSWER SECTION" mdo.tmp | grep "IN A " | sort -u >> asubs.tmp
-cat liveips.tmp | parallel -j 10 'grep " {}$" asubs.tmp' >> subs1.tmp
-cat liveips2.tmp | parallel -j 10 'grep -B 10 " {}$" mdo.tmp | grep -A 1 ANSWER | grep CNAME' >> subs2.tmp
+sed 's/$/ B/' asubs.tmp > a-subs.tmp && rm asubs.tmp
+sed 's/^/A /; s/$/ B/' liveips.tmp > live-ips.tmp && rm liveips.tmp
+grep -F -f live-ips.tmp a-subs.tmp | grep -oE '\b([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b' | sort -u > subs1.tmp
+sed 's/$/ B/' mdo.tmp > mdosed.tmp && rm mdo.tmp
+sed 's/^/A /; s/$/ B/' liveips2.tmp > live-ips2.tmp && rm liveips2.tmp
+grep -F -f live-ips2.tmp -B 10 mdosed.tmp | grep CNAME | awk -F'. ' '{print $1}' | grep -oE '\b([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b' | sort -u > subs2.tmp
 echo ""
 
 echo "Saving the result..."
-cat subs1.tmp subs2.tmp | awk -F'. ' '{print $1}' | sort -u >> httpsubdomains.txt
+cat subs1.tmp subs2.tmp | sort -u > httpsubdomains.txt
 echo ""
 
 rm *.tmp
