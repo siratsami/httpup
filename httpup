@@ -15,8 +15,8 @@ awk '/IN CNAME/,/IN A/{print}' mdo.tmp | grep ' IN A ' | awk -F'A ' '{print $2}'
 echo ""
 
 echo "Scannig for 443,80 ports on ip addresses..."
-sudo masscan -p 443,80 -iL ips.tmp -oL ipsms.tmp
-sudo masscan -p 443,80 -iL ips2.tmp -oL ips2ms.tmp
+sudo masscan -p 443 -iL ips.tmp -oL ipsms.tmp
+sudo masscan -p 443 -iL ips2.tmp -oL ips2ms.tmp
 cat ipsms.tmp | awk -F' ' '{print $4}' | awk -F' ' '{print $1}' | sort -u > liveips.tmp
 cat ips2ms.tmp | awk -F' ' '{print $4}' | sort -u > liveips2.tmp
 echo ""
